@@ -39,7 +39,7 @@ public class Spotify
 public class AudD : MonoBehaviour
 {
     [Header("API Settings")]
-    public string apiKey = "028e42450bce998615664546c83639e2"; // Ask me for the key, It will not be pushed
+    public string apiKey = ""; // Ask me for the key, It will not be pushed
     public int recordingLength = 10; // Don't go longer than 15 seconds
 
     private AudioClip recordedClip;
