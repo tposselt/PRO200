@@ -84,6 +84,8 @@ public class AudD : MonoBehaviour
         //convert to Wav and send to AudD
         StartCoroutine(SendToAudD());
     }
+    
+    
     //below this doesn't need to be called externally
     private IEnumerator SendToAudD()
     {
@@ -132,37 +134,49 @@ public class AudD : MonoBehaviour
         }
     }
     private byte[] ConvertAudioClipToWav(AudioClip clip)
-    {
+    {//create a memory stream to hold the WAV file data in memory
         using (MemoryStream stream = new MemoryStream())
         {
+            // Use BinaryWriter for easy writing of binary data to the stream
             using (BinaryWriter writer = new BinaryWriter(stream))
             {
-                // WAV header
-                writer.Write(new char[4] { 'R', 'I', 'F', 'F' });
-                writer.Write(36 + clip.samples * 2);
-                writer.Write(new char[4] { 'W', 'A', 'V', 'E' });
-                writer.Write(new char[4] { 'f', 'm', 't', ' ' });
-                writer.Write(16);
-                writer.Write((ushort)1);
-                writer.Write((ushort)clip.channels);
-                writer.Write(clip.frequency);
-                writer.Write(clip.frequency * clip.channels * 2);
-                writer.Write((ushort)(clip.channels * 2));
-                writer.Write((ushort)16);
-                writer.Write(new char[4] { 'd', 'a', 't', 'a' });
-                writer.Write(clip.samples * 2);
+                // ===== WAV FILE HEADER =====
 
-                // Audio data
+                // RIFF chunk descriptor
+                writer.Write(new char[4] { 'R', 'I', 'F', 'F' }); // RIFF header signature
+                writer.Write(36 + clip.samples * 2); // Overall file size - 36 bytes for header + audio data size
+                writer.Write(new char[4] { 'W', 'A', 'V', 'E' });// WAVE format identifier
+
+                //format subchuck
+                writer.Write(new char[4] { 'f', 'm', 't', ' ' }); // "fmt " chunk header
+                writer.Write(16); // Size of format subchunk (16 for PCM)
+                writer.Write((ushort)1); // Audio format (1 = PCM)
+                writer.Write((ushort)clip.channels); // Number of channels (1 = mono, 2 = stereo)
+                writer.Write(clip.frequency); // Sample rate (Hz)
+                writer.Write(clip.frequency * clip.channels * 2); // Byte rate (sample rate * channels * bytes per sample)
+                writer.Write((ushort)(clip.channels * 2)); // Block align (channels * bytes per sample)
+                writer.Write((ushort)16); // Bits per sample (16 bits = 2 bytes)
+
+                //data subchuck
+                writer.Write(new char[4] { 'd', 'a', 't', 'a' });// "data" chunk header
+                writer.Write(clip.samples * 2); // Size of audio data in bytes
+
+                // ===== AUDIO DATA =====
+
+                // Create array to hold all audio samples (including all channels)
                 float[] samples = new float[clip.samples * clip.channels];
+
+                // Extract the raw audio data from the AudioClip
                 clip.GetData(samples, 0);
 
+                // Convert each float sample (-1.0 to 1.0) to 16-bit integer (-32768 to 32767)
                 foreach (float sample in samples)
                 {
                     writer.Write((short)(sample * short.MaxValue));
                 }
             }
+            // Convert the memory stream to a byte array containing the complete WAV file
             return stream.ToArray();
         }
     }
-
 }
