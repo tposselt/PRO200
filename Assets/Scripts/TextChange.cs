@@ -21,88 +21,40 @@ public class TextChange : MonoBehaviour
     {
         if (screen == 1)
         {
-            for (int i = 0; i < loadingText.Length; i++)
-            {
-                float zPos = loadingText[i].transform.position.z;
-                if (zPos > 205)
-                {
-                    loadingText[i].transform.Translate(0, 0, (-4) * Time.deltaTime, Space.World);
-                }
-            }
-            for (int i = 0; i < songText.Length; i++)
-            {
-                float zPos = songText[i].transform.position.z;
-                // Debug.Log("zPos for song text is: " + zPos);
-                if (zPos <= 209)
-                {
-                    songText[i].transform.Translate(0, 0, 4 * Time.deltaTime, Space.World);
-                }
-            }
-            for (int i = 0; i < artistText.Length; i++)
-            {
-                float zPos = artistText[i].transform.position.z;
-                if (zPos <= 209)
-                {
-                    artistText[i].transform.Translate(0, 0, 4 * Time.deltaTime, Space.World);
-                }
-            }
-        } else if (screen == 2)
+            moveTextMeshes(loadingText, "back");
+            moveTextMeshes(songText, "forward");
+            moveTextMeshes(artistText, "forward");
+        }
+        else if (screen == 2)
         {
-            for (int i = 0; i < loadingText.Length; i++)
-            {
-                float zPos = loadingText[i].transform.position.z;
-                if (zPos <= 209)
-                {
-                    loadingText[i].transform.Translate(0, 0, 4 * Time.deltaTime, Space.World);
-                }
-            }
-            for (int i = 0; i < songText.Length; i++)
-            {
-                float zPos = songText[i].transform.position.z;
-                // Debug.Log("zPos for song text is: " + zPos);
-                if (zPos > 205)
-                {
-                    songText[i].transform.Translate(0, 0, (-4) * Time.deltaTime, Space.World);
-                }
-            }
-            for (int i = 0; i < artistText.Length; i++)
-            {
-                float zPos = artistText[i].transform.position.z;
-                if (zPos <= 209)
-                {
-                    artistText[i].transform.Translate(0, 0, 4 * Time.deltaTime, Space.World);
-                }
-            }
-        } else if (screen == 3)
+            moveTextMeshes(loadingText, "forward");
+            moveTextMeshes(songText, "back");
+            moveTextMeshes(artistText, "forward");
+        }
+        else if (screen == 3)
         {
-            for (int i = 0; i < loadingText.Length; i++)
-            {
-                float zPos = loadingText[i].transform.position.z;
-                if (zPos <= 209)
-                {
-                    loadingText[i].transform.Translate(0, 0, 4 * Time.deltaTime, Space.World);
-                }
-            }
-            for (int i = 0; i < songText.Length; i++)
-            {
-                float zPos = songText[i].transform.position.z;
-                // Debug.Log("zPos for song text is: " + zPos);
-                if (zPos <= 209)
-                {
-                    songText[i].transform.Translate(0, 0, 4 * Time.deltaTime, Space.World);
-                }
-            }
-            for (int i = 0; i < artistText.Length; i++)
-            {
-                float zPos = artistText[i].transform.position.z;
-                if (zPos > 205)
-                {
-                    artistText[i].transform.Translate(0, 0, (-4) * Time.deltaTime, Space.World);
-                }
-            }
-        } else
+            moveTextMeshes(loadingText, "forward");
+            moveTextMeshes(songText, "forward");
+            moveTextMeshes(artistText, "back");
+        }
+        else
         {
             screen = 1;
+        }
+    }
+    
+    private void moveTextMeshes(TextMeshPro[] textArray, String direction)
+    {
+        for (int i = 0; i < textArray.Length; i++)
+            {
+            float zPos = textArray[i].transform.position.z;
+            if (direction.Equals("back") && zPos > 205)
+            {
+                textArray[i].transform.Translate(0, 0, (-4) * Time.deltaTime, Space.World);
+            } else if (direction.Equals("forward") && zPos <= 209)
+            {
+                textArray[i].transform.Translate(0, 0, 4 * Time.deltaTime, Space.World);
+            }
         }
     }
 }
