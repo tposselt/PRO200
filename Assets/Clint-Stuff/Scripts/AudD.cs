@@ -40,57 +40,106 @@ public class AudD : MonoBehaviour
 {
     [Header("API Settings")]
     public string apiKey = ""; // Ask me for the key, It will not be pushed
-    public int recordingLength = 10; // Don't go longer than 15 seconds
 
-    private AudioClip recordedClip;
-    public bool isRecording = false;
+    private AudioClip soundClip;
+    private string mic;
+    private float[] audioData;
+    private bool isRecording;
+    private int sampleRate = 44100;
+    private int maxRecordingLength = 10;
 
-    private void Start()
+    void Start()
     {
-        //check for microphone
         if (Microphone.devices.Length == 0)
         {
-            Debug.LogError("No mic found");
+            Debug.LogError("No microphone devices found.");
             return;
         }
-    }
-    public void StartRecording() //Call this on button press
-    {
-        //Can't start recording if you're already recording
-        if (isRecording) return;
 
-        //start recording with first microphone connected
-        string deviceName = Microphone.devices[0];
-        recordedClip = Microphone.Start(deviceName, false, recordingLength, 44100);
+        mic = Microphone.devices[0];
+        Debug.Log("Using microphone: " + mic);
+    }
+
+    void Update() //Once UI is done, this method can be deleted
+    {
+        if (Input.GetKeyDown(KeyCode.R) && !isRecording)
+        {
+            StartRecording();
+        }
+        else if (Input.GetKeyDown(KeyCode.R) && isRecording)
+        {
+            StopRecording();
+        }
+    }
+
+    void StartRecording() // call this on button press
+    {
+        soundClip = Microphone.Start(mic, false, maxRecordingLength, sampleRate);
         isRecording = true;
+        Debug.Log("Recording started...");
 
-        Debug.Log("Recording Started. . .");
+        audioData = new float[sampleRate * (int)maxRecordingLength];
 
-        //Stop recording after reaching wanted length
-        Invoke("StopRecording", recordingLength);
+        Invoke("StopRecording", maxRecordingLength);
     }
-    public void StopRecording() //Will be called after recordingLength is reached or when canceled by
-        //the user
+
+    void StopRecording() //auto called, call to stop recording early
     {
-        //can't stop what isn't started
         if (!isRecording) return;
 
-        
-        Microphone.End(Microphone.devices[0]);
+        Microphone.End(mic);
         isRecording = false;
+        Debug.Log("Recording stopped.");
 
-        Debug.Log("Recording stopped. Processing. . .");
+        soundClip.GetData(audioData, 0);
+        ConvertSoundClip(audioData);
+        Save();
+        
 
-        //convert to Wav and send to AudD
+        //audio recording testing code
+        /* // wait for 5 seconds before playing back the audio
+        AudioSource audioSource = GetComponent<AudioSource>();
+        if (audioSource != null)
+        {
+            StartCoroutine(PlayAudioAfterDelay(audioSource, soundClip, 5f));
+        }*/
+
+    }
+
+    IEnumerator PlayAudioAfterDelay(AudioSource audioSource, AudioClip clip, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        audioSource.clip = clip;
+        audioSource.Play();
+    } //used to test recording
+
+    void ConvertSoundClip(float[] data) //need this explained
+    {
+        float amp = 0f;
+        for (int i = 0; i < data.Length; i++)
+        {
+            amp = Mathf.Max(amp, Mathf.Abs(data[i]));
+        }
+    }
+
+    void Save() //auto called when recording stops
+    {
         StartCoroutine(SendToAudD());
     }
-    
-    
+
+    private void OnDestroy()
+    {
+        if (isRecording)
+        {
+            Microphone.End(mic);
+        }
+    }
+
     //below this doesn't need to be called externally
     private IEnumerator SendToAudD()
     {
         //convert audioclip to wav bytes
-        byte[] wavData = ConvertAudioClipToWav(recordedClip);
+        byte[] wavData = ConvertAudioClipToWav(soundClip);
 
         //form data
         WWWForm form = new WWWForm();
