@@ -43,10 +43,10 @@ public class TextChange : MonoBehaviour
         }
     }
     
-    private void moveTextMeshes(TextMeshPro[] textArray, String direction)
+    private void moveTextMeshes(TextMeshPro[] textArray, string direction)
     {
         for (int i = 0; i < textArray.Length; i++)
-            {
+        {
             float zPos = textArray[i].transform.position.z;
             if (direction.Equals("back") && zPos > 205)
             {
