@@ -1519,6 +1519,7 @@ GameObject:
   - component: {fileID: 1611748921}
   - component: {fileID: 1611748920}
   - component: {fileID: 1611748924}
+  - component: {fileID: 1611748925}
   m_Layer: 0
   m_Name: loading background
   m_TagString: Untagged
@@ -1645,6 +1646,19 @@ MonoBehaviour:
   - {fileID: 1692389414}
   - {fileID: 1852600636}
   screen: 1
+--- !u!114 &1611748925
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1611748919}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d8af7955134a40f4fbb914e14b1d7cfa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AudD
+  apiKey: 
 --- !u!1 &1692389413
 GameObject:
   m_ObjectHideFlags: 0

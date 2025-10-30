@@ -62,11 +62,17 @@ public class AudD : MonoBehaviour
 
     void Update() //Once UI is done, this method can be deleted
     {
-        if (Input.GetKeyDown(KeyCode.R) && !isRecording)
+        
+
+    }
+    
+    public void clickRecordButton() //link this to the UI button
+    {
+        if (!isRecording)
         {
             StartRecording();
         }
-        else if (Input.GetKeyDown(KeyCode.R) && isRecording)
+        else
         {
             StopRecording();
         }
