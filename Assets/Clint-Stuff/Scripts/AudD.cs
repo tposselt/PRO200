@@ -3,7 +3,6 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.Networking;
 
-
 [System.Serializable]
 public class AudDResponse
 {
@@ -47,9 +46,11 @@ public class AudD : MonoBehaviour
     private bool isRecording;
     private int sampleRate = 44100;
     private int maxRecordingLength = 10;
+    TextChange tc;
 
     void Start()
     {
+        tc = FindObjectOfType<TextChange>();
         if (Microphone.devices.Length == 0)
         {
             Debug.LogError("No microphone devices found.");
@@ -91,6 +92,8 @@ public class AudD : MonoBehaviour
 
     void StopRecording() //auto called, call to stop recording early
     {
+        tc.screen = 2; //move to next screen when recording stops
+
         if (!isRecording) return;
 
         Microphone.End(mic);

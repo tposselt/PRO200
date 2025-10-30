@@ -42,6 +42,11 @@ public class TextChange : MonoBehaviour
             screen = 1;
         }
     }
+
+    public void clickedArtist()
+    {
+        screen = 3;
+    }
     
     private void moveTextMeshes(TextMeshPro[] textArray, string direction)
     {
