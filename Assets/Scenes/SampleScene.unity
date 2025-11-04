@@ -1853,6 +1853,7 @@ MonoBehaviour:
   - {fileID: 290769466}
   - {fileID: 1692389414}
   - {fileID: 1852600636}
+  backgroundMat: {fileID: 2100000, guid: 56c8c4c3384f1d445b38ee6745d6b600, type: 2}
   screen: 1
 --- !u!114 &1611748925
 MonoBehaviour:

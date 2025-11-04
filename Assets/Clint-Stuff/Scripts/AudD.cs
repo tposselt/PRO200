@@ -48,6 +48,7 @@ public class AudD : MonoBehaviour
     private int maxRecordingLength = 10;
     TextChange tc;
 
+    [System.Obsolete]
     void Start()
     {
         tc = FindObjectOfType<TextChange>();

@@ -8,12 +8,13 @@ public class TextChange : MonoBehaviour
     public TextMeshPro[] loadingText = new TextMeshPro[2];
     public TextMeshPro[] songText = new TextMeshPro[6];
     public TextMeshPro[] artistText = new TextMeshPro[3];
+    public Material backgroundMat;
     public int screen = 1;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        backgroundMat = new Material(Shader.Find("UnLit/Texture"));
     }
 
     // Update is called once per frame
@@ -24,18 +25,21 @@ public class TextChange : MonoBehaviour
             moveTextMeshes(loadingText, "back");
             moveTextMeshes(songText, "forward");
             moveTextMeshes(artistText, "forward");
+            backgroundMat.SetTexture("_MainTex", Resources.Load<Texture2D>("Background1"));
         }
         else if (screen == 2)
         {
             moveTextMeshes(loadingText, "forward");
             moveTextMeshes(songText, "back");
             moveTextMeshes(artistText, "forward");
+            backgroundMat.SetTexture("_MainTex", Resources.Load<Texture2D>("TwentyOnePilotsScaledandIcy"));
         }
         else if (screen == 3)
         {
             moveTextMeshes(loadingText, "forward");
             moveTextMeshes(songText, "forward");
             moveTextMeshes(artistText, "back");
+            backgroundMat.SetTexture("_MainTex", Resources.Load<Texture2D>("Background3"));
         }
         else
         {
