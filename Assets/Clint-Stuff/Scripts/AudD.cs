@@ -1,7 +1,9 @@
 using System.Collections;
 using System.IO;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 
 [System.Serializable]
@@ -38,15 +40,21 @@ public class Spotify
 }
 public class AudD : MonoBehaviour
 {
+    [Header("UI pieces")]
+    [SerializeField] public TMPro.TextMeshProUGUI songTitle;
+    [SerializeField] public AudioClip test;
+    [SerializeField] public AudioSource source;
+
+
     [Header("API Settings")]
-    public string apiKey = ""; // Ask me for the key, It will not be pushed
+    public string apiKey = "e0e172e3668e244a3a110482f0bd6503"; // Ask me for the key, It will not be pushed
 
     private AudioClip soundClip;
     private string mic;
     private float[] audioData;
     private bool isRecording;
     private int sampleRate = 44100;
-    private int maxRecordingLength = 10;
+    private int maxRecordingLength = 12;
 
     void Start()
     {
@@ -58,22 +66,40 @@ public class AudD : MonoBehaviour
 
         mic = Microphone.devices[0];
         Debug.Log("Using microphone: " + mic);
+        source = GetComponent<AudioSource>();
     }
 
     void Update() //Once UI is done, this method can be deleted
     {
-        if (Input.GetKeyDown(KeyCode.R) && !isRecording)
+     
+    }
+    public void OnClickSound()
+    {
+        if(test != null)
+        {
+            source.clip = test;
+            source.Play();
+            Debug.Log("Play Sound");
+        }
+        else
+        {
+            Debug.Log("You fucked up");
+        }
+    }
+    public void OnCLickRecord()
+    {
+        if (!isRecording)
         {
             StartRecording();
         }
-        else if (Input.GetKeyDown(KeyCode.R) && isRecording)
+        else
         {
             StopRecording();
         }
     }
-
-    void StartRecording() // call this on button press
+    public void StartRecording() // call this on button press
     {
+        songTitle.text = "Listening";
         soundClip = Microphone.Start(mic, false, maxRecordingLength, sampleRate);
         isRecording = true;
         Debug.Log("Recording started...");
@@ -91,18 +117,17 @@ public class AudD : MonoBehaviour
         isRecording = false;
         Debug.Log("Recording stopped.");
 
-        soundClip.GetData(audioData, 0);
-        ConvertSoundClip(audioData);
+        
         Save();
         
 
         //audio recording testing code
-        /* // wait for 5 seconds before playing back the audio
+         // wait for 5 seconds before playing back the audio
         AudioSource audioSource = GetComponent<AudioSource>();
         if (audioSource != null)
         {
             StartCoroutine(PlayAudioAfterDelay(audioSource, soundClip, 5f));
-        }*/
+        }
 
     }
 
@@ -166,7 +191,7 @@ public class AudD : MonoBehaviour
     }
     private void ProcessAudDResponse(string json)
     {
-        Debug.Log($"AudD Response: {json}");
+        Debug.Log($"AudD Response: {json}"); //this keeps coming back null
 
         //parse json response
         AudDResponse response = JsonUtility.FromJson<AudDResponse>(json);
@@ -174,12 +199,16 @@ public class AudD : MonoBehaviour
         if (response.status == "success" && response.result != null)
         {
             Debug.Log($"Song found: {response.result.title} by {response.result.artist}");
+            string title = response.result.title;
+            string artist = response.result.artist;
+            songTitle.text = $"Song found: {title} by {artist}";
 
            //Here we will call anything requiring the information provided by AudD by passing in response variable
         }
         else
         {
             Debug.LogError("No song recognized or api error");
+            songTitle.text = "No song recognized or api error";
         }
     }
     private byte[] ConvertAudioClipToWav(AudioClip clip)
