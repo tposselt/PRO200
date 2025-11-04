@@ -86,7 +86,7 @@ public class AudD : MonoBehaviour
             Debug.Log("You fucked up");
         }
     }
-    public void OnCLickRecord()
+    public void OnCLickRecord() // call this on button press
     {
         if (!isRecording)
         {
@@ -97,7 +97,7 @@ public class AudD : MonoBehaviour
             StopRecording();
         }
     }
-    public void StartRecording() // call this on button press
+    public void StartRecording() 
     {
         songTitle.text = "Listening";
         soundClip = Microphone.Start(mic, false, maxRecordingLength, sampleRate);
