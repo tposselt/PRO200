@@ -44,10 +44,11 @@ public class AudD : MonoBehaviour
     [SerializeField] public TMPro.TextMeshProUGUI songTitle;
     [SerializeField] public AudioClip test;
     [SerializeField] public AudioSource source;
+    [SerializeField] public SongDisplay songDisplay;
 
 
     [Header("API Settings")]
-    public string apiKey = "e0e172e3668e244a3a110482f0bd6503"; // Ask me for the key, It will not be pushed
+    public string apiKey = ""; // Ask me for the key, It will not be pushed
 
     private AudioClip soundClip;
     private string mic;
@@ -73,6 +74,7 @@ public class AudD : MonoBehaviour
     {
      
     }
+
     public void OnClickSound()
     {
         if(test != null)
@@ -196,18 +198,19 @@ public class AudD : MonoBehaviour
         //parse json response
         AudDResponse response = JsonUtility.FromJson<AudDResponse>(json);
 
-        if (response.status == "success" && response.result != null)
+        if (response.status == "success" && response.result != null && response.result.title != null)
         {
             Debug.Log($"Song found: {response.result.title} by {response.result.artist}");
             string title = response.result.title;
             string artist = response.result.artist;
             songTitle.text = $"Song found: {title} by {artist}";
+            songDisplay.DisplaySong(response.result);
 
            //Here we will call anything requiring the information provided by AudD by passing in response variable
         }
         else
         {
-            Debug.LogError("No song recognized or api error");
+            //Debug.LogError("No song recognized or api error");
             songTitle.text = "No song recognized or api error";
         }
     }
