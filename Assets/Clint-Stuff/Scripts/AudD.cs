@@ -57,7 +57,10 @@ public class Spotify
 public class AudD : MonoBehaviour
 {
     [Header("UI pieces")]
-    [SerializeField] public TMPro.TextMeshProUGUI songTitle;
+    [SerializeField] public TMPro.TextMeshProUGUI statusText;
+    [SerializeField] public TMPro.TextMeshProUGUI buttonText;
+    [SerializeField] public Canvas buttonCanvas;
+    [SerializeField] public Image buttonImage;
     [SerializeField] public AudioClip test;
     [SerializeField] public AudioSource source;
     [SerializeField] public SongDisplay songDisplay;
@@ -74,6 +77,9 @@ public class AudD : MonoBehaviour
     private int sampleRate = 44100;
     private int maxRecordingLength = 12;
 
+    private Color startButtonColor = new Color(0.973f, 0.973f, 1.0f);
+    private Color stopButtonColor = new Color(0.925f, 0.514f, 0.5f);
+
     void Start()
     {
         if (Microphone.devices.Length == 0)
@@ -85,11 +91,20 @@ public class AudD : MonoBehaviour
         mic = Microphone.devices[0];
         Debug.Log("Using microphone: " + mic);
         source = GetComponent<AudioSource>();
+        ResetUI();
     }
 
     void Update() //Once UI is done, this method can be deleted
     {
      
+    }
+
+    public void ResetUI()
+    {
+        buttonImage.color = startButtonColor;
+        buttonText.text = "Start Listening";
+        statusText.text = "";
+        buttonCanvas.enabled = true;
     }
 
     public void OnClickSound()
@@ -116,9 +131,14 @@ public class AudD : MonoBehaviour
             StopRecording();
         }
     }
-    public void StartRecording() 
+    public void StartRecording()
     {
-        songTitle.text = "Listening";
+        songDisplay.Hide();
+        ResetUI();
+        statusText.text = "Listening...";
+        buttonText.text = "Stop Listening";
+        buttonImage.color = stopButtonColor;
+
         soundClip = Microphone.Start(mic, false, maxRecordingLength, sampleRate);
         isRecording = true;
         Debug.Log("Recording started...");
@@ -182,6 +202,9 @@ public class AudD : MonoBehaviour
     //below this doesn't need to be called externally
     private IEnumerator SendToAudD()
     {
+        buttonCanvas.enabled = false;
+        statusText.text = "Processing...";
+
         //convert audioclip to wav bytes
         byte[] wavData = ConvertAudioClipToWav(soundClip);
 
@@ -220,7 +243,7 @@ public class AudD : MonoBehaviour
             Debug.Log($"Song found: {response.result.title} by {response.result.artist}");
             string title = response.result.title;
             string artist = response.result.artist;
-            songTitle.text = $"Song found: {title} by {artist}";
+            statusText.text = "Song found!";
 
             Texture2D texture = missingAlbumArt;
 
@@ -230,6 +253,7 @@ public class AudD : MonoBehaviour
                 if (url != null && !url.Equals("")) texture = await GetTexture(url);
             }
 
+            Debug.Log(texture);
             songDisplay.DisplaySong(response.result, texture);
 
            //Here we will call anything requiring the information provided by AudD by passing in response variable
@@ -237,7 +261,8 @@ public class AudD : MonoBehaviour
         else
         {
             //Debug.LogError("No song recognized or api error");
-            songTitle.text = "No song recognized or api error";
+            ResetUI();
+            statusText.text = "No song recognized :(";
         }
     }
     private byte[] ConvertAudioClipToWav(AudioClip clip)
