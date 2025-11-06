@@ -47,7 +47,7 @@ public class AudD : MonoBehaviour
 
 
     [Header("API Settings")]
-    public string apiKey = "e0e172e3668e244a3a110482f0bd6503"; // Ask me for the key, It will not be pushed
+    public string apiKey = "cc8d16cae6cb5d5fa9fa574b1a544ece"; // Ask me for the key, It will not be pushed
 
     private AudioClip soundClip;
     private string mic;
@@ -191,7 +191,7 @@ public class AudD : MonoBehaviour
     }
     private void ProcessAudDResponse(string json)
     {
-        Debug.Log($"AudD Response: {json}"); //this keeps coming back null
+        Debug.Log($"AudD Response: {json}"); 
 
         //parse json response
         AudDResponse response = JsonUtility.FromJson<AudDResponse>(json);
@@ -205,10 +205,16 @@ public class AudD : MonoBehaviour
 
            //Here we will call anything requiring the information provided by AudD by passing in response variable
         }
+        else if(response.status == "success" && response.result == null)
+        {
+            Debug.LogError("No song recognized");
+            songTitle.text = "No song recognized";
+        }
         else
         {
-            Debug.LogError("No song recognized or api error");
-            songTitle.text = "No song recognized or api error";
+            Debug.LogError("API error");
+            songTitle.text = "API error";
+            songTitle.text = response.status;
         }
     }
     private byte[] ConvertAudioClipToWav(AudioClip clip)
