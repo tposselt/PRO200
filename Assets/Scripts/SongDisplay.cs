@@ -15,12 +15,13 @@ public class SongDisplay : MonoBehaviour
        SongUI.enabled = false;
     }
 
-    public void DisplaySong(AudDResult result)
+    public void DisplaySong(AudDResult result, Texture2D texture)
     {
-        Debug.Log("hi");
+        DateTime releaseDate = DateTime.Parse(result.release_date);
 
         Title.text = result.title + "\n\n" + result.album;
-        Artist.text = result.artist + "\n" + result.release_date;
+        Artist.text = result.artist + "\n" + releaseDate.ToString("MMMM d, yyyy");
+        Cover.material.mainTexture = texture;
         //Label.text = result.label;
         //TimeCode.text = result.timecode;
         //SongLink.text = result.song_link;
