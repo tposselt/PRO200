@@ -1,6 +1,8 @@
 using System.Collections;
 using System.IO;
+using System.Threading.Tasks;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
@@ -28,9 +30,23 @@ public class AudDResult
 }
 
 [System.Serializable]
+public class AlbumArt
+{
+    public int width;
+    public int height;
+    public string url;
+
+    public string GetUrl()
+    {
+        return url.Replace("{w}", width.ToString()).Replace("{h}", height.ToString());
+    }
+}
+
+[System.Serializable]
 public class AppleMusic
 {
     public string url;
+    public AlbumArt artwork;
 }
 
 [System.Serializable]
@@ -41,13 +57,18 @@ public class Spotify
 public class AudD : MonoBehaviour
 {
     [Header("UI pieces")]
-    [SerializeField] public TMPro.TextMeshProUGUI songTitle;
+    [SerializeField] public TMPro.TextMeshProUGUI statusText;
+    [SerializeField] public TMPro.TextMeshProUGUI buttonText;
+    [SerializeField] public Canvas buttonCanvas;
+    [SerializeField] public Image buttonImage;
     [SerializeField] public AudioClip test;
     [SerializeField] public AudioSource source;
+    [SerializeField] public SongDisplay songDisplay;
+    [SerializeField] public Texture2D missingAlbumArt;
 
 
     [Header("API Settings")]
-    public string apiKey = "cc8d16cae6cb5d5fa9fa574b1a544ece"; // Ask me for the key, It will not be pushed
+    public string apiKey = ""; // Ask me for the key, It will not be pushed
 
     private AudioClip soundClip;
     private string mic;
@@ -55,6 +76,9 @@ public class AudD : MonoBehaviour
     private bool isRecording;
     private int sampleRate = 44100;
     private int maxRecordingLength = 12;
+
+    private Color startButtonColor = new Color(0.973f, 0.973f, 1.0f);
+    private Color stopButtonColor = new Color(0.925f, 0.514f, 0.5f);
 
     void Start()
     {
@@ -67,12 +91,22 @@ public class AudD : MonoBehaviour
         mic = Microphone.devices[0];
         Debug.Log("Using microphone: " + mic);
         source = GetComponent<AudioSource>();
+        ResetUI();
     }
 
     void Update() //Once UI is done, this method can be deleted
     {
      
     }
+
+    public void ResetUI()
+    {
+        buttonImage.color = startButtonColor;
+        buttonText.text = "Start Listening";
+        statusText.text = "";
+        buttonCanvas.enabled = true;
+    }
+
     public void OnClickSound()
     {
         if(test != null)
@@ -97,9 +131,14 @@ public class AudD : MonoBehaviour
             StopRecording();
         }
     }
-    public void StartRecording() 
+    public void StartRecording()
     {
-        songTitle.text = "Listening";
+        songDisplay.Hide();
+        ResetUI();
+        statusText.text = "Listening...";
+        buttonText.text = "Stop Listening";
+        buttonImage.color = stopButtonColor;
+
         soundClip = Microphone.Start(mic, false, maxRecordingLength, sampleRate);
         isRecording = true;
         Debug.Log("Recording started...");
@@ -163,6 +202,9 @@ public class AudD : MonoBehaviour
     //below this doesn't need to be called externally
     private IEnumerator SendToAudD()
     {
+        buttonCanvas.enabled = false;
+        statusText.text = "Processing...";
+
         //convert audioclip to wav bytes
         byte[] wavData = ConvertAudioClipToWav(soundClip);
 
@@ -189,32 +231,38 @@ public class AudD : MonoBehaviour
             }
         }
     }
-    private void ProcessAudDResponse(string json)
+    private async Task ProcessAudDResponse(string json)
     {
-        Debug.Log($"AudD Response: {json}"); 
+        Debug.Log($"AudD Response: {json}"); //this keeps coming back null
 
         //parse json response
         AudDResponse response = JsonUtility.FromJson<AudDResponse>(json);
 
-        if (response.status == "success" && response.result != null)
+        if (response.status == "success" && response.result != null && response.result.title != null)
         {
             Debug.Log($"Song found: {response.result.title} by {response.result.artist}");
             string title = response.result.title;
             string artist = response.result.artist;
-            songTitle.text = $"Song found: {title} by {artist}";
+            statusText.text = "Song found!";
+
+            Texture2D texture = missingAlbumArt;
+
+            if (response.result.apple_music != null && response.result.apple_music.artwork != null)
+            {
+                string url = response.result.apple_music.artwork.GetUrl();
+                if (url != null && !url.Equals("")) texture = await GetTexture(url);
+            }
+
+            Debug.Log(texture);
+            songDisplay.DisplaySong(response.result, texture);
 
            //Here we will call anything requiring the information provided by AudD by passing in response variable
         }
-        else if(response.status == "success" && response.result == null)
-        {
-            Debug.LogError("No song recognized");
-            songTitle.text = "No song recognized";
-        }
         else
         {
-            Debug.LogError("API error");
-            songTitle.text = "API error";
-            songTitle.text = response.status;
+            //Debug.LogError("No song recognized or api error");
+            ResetUI();
+            statusText.text = "No song recognized :(";
         }
     }
     private byte[] ConvertAudioClipToWav(AudioClip clip)
@@ -261,6 +309,24 @@ public class AudD : MonoBehaviour
             }
             // Convert the memory stream to a byte array containing the complete WAV file
             return stream.ToArray();
+        }
+    }
+
+    public async Task<Texture2D> GetTexture(string url)
+    {
+        using (UnityWebRequest www = UnityWebRequestTexture.GetTexture(url))
+        {
+            var operation = www.SendWebRequest();
+            while (!operation.isDone)
+                await Task.Yield();
+
+            if (www.result != UnityWebRequest.Result.Success)
+            {
+                Debug.LogError(www.error);
+                return null;
+            }
+
+            return DownloadHandlerTexture.GetContent(www);
         }
     }
 }
