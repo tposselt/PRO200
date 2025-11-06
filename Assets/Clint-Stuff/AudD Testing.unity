@@ -159,7 +159,7 @@ MonoBehaviour:
   source: {fileID: 1877304141}
   songDisplay: {fileID: 438683349}
   missingAlbumArt: {fileID: 2800000, guid: 23a25ca99a0264447aa40b605a4e8f42, type: 3}
-  apiKey: 
+  apiKey: cc8d16cae6cb5d5fa9fa574b1a544ece
 --- !u!114 &24696599
 MonoBehaviour:
   m_ObjectHideFlags: 0
